@@ -270,11 +270,27 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+// Serve static files from src directory (for HTML, CSS, JS)
+app.use('/src', express.static(path.join(__dirname, 'src')));
+app.use(express.static(path.join(__dirname, 'src')));
+
+// Helper function to serve HTML files (Vercel-compatible)
+const serveHTML = (res, filePath) => {
+    if (process.env.VERCEL) {
+        // In Vercel, redirect to static file path
+        const relativePath = filePath.replace(__dirname, '').replace(/\\/g, '/');
+        res.redirect(relativePath);
+    } else {
+        // Local development: use sendFile
+        res.sendFile(filePath);
+    }
+};
+
 // Request logger middleware
 app.use((req, res, next) => {
-    console.log(`📡 ${req.method} ${req.url} - ${new Date().toISOString()}`);
+    console.log(` ${req.method} ${req.url} - ${new Date().toISOString()}`);
     if (req.url.includes('/api/auth/')) {
-        console.log('🔍 AUTH REQUEST:', req.method, req.url);
+        console.log(' AUTH REQUEST:', req.method, req.url);
     }
     next();
 });
@@ -647,19 +663,12 @@ app.get('/admin/login', (req, res) => {
     console.log('📂 File path:', filePath);
     console.log('📁 File exists:', fs.existsSync(filePath));
     
-    res.sendFile(filePath, (err) => {
-        if (err) {
-            console.error('❌ Error sending file:', err);
-            res.status(500).send('Error loading login page: ' + err.message);
-        } else {
-            console.log('✅ Login page sent successfully');
-        }
-    });
+    serveHTML(res, filePath);
 });
 
 app.get('/admin/first-login', (req, res) => {
     console.log('📝 First login page requested');
-    res.sendFile(path.join(__dirname, 'src', 'components', 'admin', 'FirstLogin.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'admin', 'FirstLogin.html'));
 });
 
 app.get('/admin/dashboard', (req, res) => {
@@ -669,40 +678,40 @@ app.get('/admin/dashboard', (req, res) => {
         'Pragma': 'no-cache',
         'Expires': '0'
     });
-    res.sendFile(path.join(__dirname, 'src', 'components', 'admin', 'AdminDashboard.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'admin', 'AdminDashboard.html'));
 });
 
 // Serve main login page (Student/Trainer combined)
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'login.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'login.html'));
 });
 
 // Serve HOD pages
 app.get('/hod/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'components', 'hod', 'HODLogin.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'hod', 'HODLogin.html'));
 });
 
 app.get('/hod/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'components', 'hod', 'HODDashboard.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'hod', 'HODDashboard.html'));
 });
 
 // Serve trainer pages
 app.get('/trainer/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'components', 'trainer', 'TrainerLogin.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'trainer', 'TrainerLogin.html'));
 });
 
 app.get('/trainer/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'components', 'trainer', 'TrainerDashboard.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'trainer', 'TrainerDashboard.html'));
 });
 
 // Serve student pages
 app.get('/student/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'components', 'student', 'StudentPortalTailwind.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'student', 'StudentPortalTailwind.html'));
 });
 
 // Serve admission letter template
 app.get('/src/components/registrar/AdmissionLetter.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'components', 'registrar', 'AdmissionLetter.html'));
+    serveHTML(res, path.join(__dirname, 'src', 'components', 'registrar', 'AdmissionLetter.html'));
 });
 
 // Function to initialize programs in database
