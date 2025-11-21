@@ -6,7 +6,16 @@
       "use": "@vercel/node",
       "config": {
         "maxLambdaSize": "50mb",
-        "includeFiles": ["src/**"]
+        "includeFiles": [
+          "src/**/*.html",
+          "src/**/*.css",
+          "src/**/*.js",
+          "src/**/*.json",
+          "src/**/*.png",
+          "src/**/*.jpg",
+          "src/**/*.svg",
+          "src/**/*.txt"
+        ]
       }
     }
   ],
