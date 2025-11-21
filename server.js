@@ -277,9 +277,16 @@ app.use(express.static(path.join(__dirname, 'src')));
 // Helper function to serve HTML files (Vercel-compatible)
 const serveHTML = (res, filePath) => {
     if (process.env.VERCEL) {
-        // In Vercel, redirect to static file path
-        const relativePath = filePath.replace(__dirname, '').replace(/\\/g, '/');
-        res.redirect(relativePath);
+        // In Vercel, read file and send content directly
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+            res.setHeader('Content-Type', 'text/html');
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.send(content);
+        } catch (err) {
+            console.error('Error reading file:', err);
+            res.status(404).send('Page not found');
+        }
     } else {
         // Local development: use sendFile
         res.sendFile(filePath);
